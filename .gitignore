@@ -1,0 +1,5 @@
+.env
+.env.txt
+corp_codes.json
+corp_codes.json.tmp
+__pycache__/

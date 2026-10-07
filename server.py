@@ -210,6 +210,15 @@ def corps():
 
 
 # ---------------------------------------------------------------- Gemini
+class GeminiError(RuntimeError):
+    def __init__(self, msg, code=0):
+        super().__init__(msg)
+        self.code = code
+
+
+BUSY = (429, 500, 502, 503, 504)  # 혼잡·일시 오류: 잠시 뒤 다시 하거나 다른 모델로 넘어가면 되는 경우
+
+
 def gemini_http(path, payload=None, timeout=60):
     req = urllib.request.Request(
         GEMINI + path,
@@ -225,9 +234,9 @@ def gemini_http(path, payload=None, timeout=60):
             msg = json.loads(body)["error"]["message"]
         except Exception:
             msg = body[:300]
-        raise RuntimeError("Gemini 오류 (HTTP %s): %s" % (e.code, hide(msg)))
+        raise GeminiError("Gemini 오류 (HTTP %s): %s" % (e.code, hide(msg)), e.code)
     except Exception as e:
-        raise RuntimeError(net_error(e, "Gemini"))
+        raise GeminiError(net_error(e, "Gemini"))
 
 
 _models = None
@@ -258,26 +267,52 @@ def gemini_text(res):
     return "".join(p.get("text", "") for p in parts).strip()
 
 
+_good_model = None  # 마지막으로 성공한 모델을 다음에 먼저 시도
+
+
 def ask_gemini(prompt, search=False):
+    """모델이 혼잡(503 등)하면 잠깐 기다렸다 한 번 더 해 보고, 그래도 안 되면 다른 모델로 넘어갑니다."""
+    global _good_model
     if not GEMINI_KEY:
         raise RuntimeError(".env 파일에 GEMINI_API_KEY가 없습니다.")
-    tried = ([GEMINI_MODEL] if GEMINI_MODEL else []) + [m for m in gemini_models() if m != GEMINI_MODEL]
-    if not tried:
+    order = []
+    for m in [_good_model, GEMINI_MODEL] + gemini_models():
+        if m and m not in order:
+            order.append(m)
+    if not order:
         raise RuntimeError("이 Gemini 키로 사용할 수 있는 모델이 없습니다.")
-    last = ""
-    for model in tried[:3]:
-        for with_search in ([True, False] if search else [False]):
+    deadline = time.time() + 80  # 전체 대기 시간 한도(초)
+    busy, other = [], ""
+    for model in order[:6]:
+        with_search, attempt = search, 0
+        while time.time() < deadline:
+            attempt += 1
             body = {"contents": [{"parts": [{"text": prompt}]}]}
             if with_search:
                 body["tools"] = [{"google_search": {}}]
             try:
-                text = gemini_text(gemini_http("models/%s:generateContent" % model, body, timeout=90))
+                left = max(10, min(60, deadline - time.time()))
+                text = gemini_text(gemini_http("models/%s:generateContent" % model, body, timeout=left))
                 if text:
+                    _good_model = model
                     return text, model, with_search
-                last = "%s: 빈 응답" % model
-            except Exception as e:
-                last = "%s: %s" % (model, hide(e))
-    raise RuntimeError(last)
+                other = "%s: 빈 응답" % model
+                break
+            except GeminiError as e:
+                if e.code in BUSY:
+                    if attempt == 1:
+                        time.sleep(3)  # 같은 모델로 한 번만 더
+                        continue
+                    busy.append(model)
+                    break
+                if with_search:  # 검색 기능을 못 쓰는 모델이면 검색 없이 한 번 더
+                    with_search, attempt = False, 0
+                    continue
+                other = "%s: %s" % (model, hide(e))
+                break
+    if busy:
+        raise RuntimeError("지금 Gemini 서버가 혼잡해서 응답을 받지 못했습니다. 1~2분 뒤에 다시 눌러 주세요. (시도한 모델: %s)" % ", ".join(busy))
+    raise RuntimeError(other or "Gemini 응답을 받지 못했습니다.")
 
 
 def insight_prompt(name):
