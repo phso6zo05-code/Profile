@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>내 포트폴리오: 진로 탐색과 스마트 기업 매칭</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-soft: #eff6ff;
+      --ai-purple: #8b5cf6;
+      --ai-purple-soft: #f5f3ff;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --tx: #0f172a;
+      --tx-sub: #334155;
+      --mu: #64748b;
+      --bd: #e2e8f0;
+      --bd-light: #f1f5f9;
+      --success: #10b981;
+      --success-bg: #ecfdf5;
+      --warning: #f59e0b;
+      --warning-bg: #fffbeb;
+      --danger: #ef4444;
+      --danger-bg: #fef2f2;
+      --radius: 12px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    }
+    [data-theme="dark"] {
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-soft: #1e293b;
+      --ai-purple: #a78bfa;
+      --ai-purple-soft: #2e1065;
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --tx: #f3f4f6;
+      --tx-sub: #cbd5e1;
+      --mu: #94a3b8;
+      --bd: #1f2937;
+      --bd-light: #182030;
+      --success: #34d399;
+      --success-bg: #064e3b;
+      --warning: #fbbf24;
+      --warning-bg: #78350f;
+      --danger: #f87171;
+      --danger-bg: #7f1d1d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--tx); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+    header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--bd); padding: 0 20px;
+    }
+    [data-theme="dark"] header { background: rgba(17, 24, 39, 0.85); }
+    .nav-inner { max-width: 960px; margin: 0 auto; height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand { font-size: 18px; font-weight: 700; color: var(--primary); text-decoration: none; }
+    nav { display: flex; gap: 14px; overflow-x: auto; }
+    nav a { color: var(--mu); text-decoration: none; font-size: 14px; font-weight: 500; white-space: nowrap; }
+    nav a:hover { color: var(--primary); }
+    main { max-width: 960px; width: 100%; margin: 0 auto; padding: 24px 20px 60px; flex: 1; }
+    section { padding: 32px 0; border-bottom: 1px solid var(--bd-light); }
+    section:last-of-type { border-bottom: 0; }
+    .card { background: var(--card-bg); border: 1px solid var(--bd); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-sm); }
+    .card + .card { margin-top: 14px; }
+    .hero-title { font-size: clamp(28px, 5vw, 38px); font-weight: 800; line-height: 1.25; margin-bottom: 8px; }
+    .hero-sub { font-size: 15px; color: var(--mu); margin-bottom: 12px; }
+    .hero-intro { font-size: 15px; color: var(--tx-sub); margin-bottom: 14px; }
+    .best-banner { background: var(--primary-soft); border: 1px solid rgba(37, 99, 235, 0.2); border-radius: var(--radius); padding: 12px 16px; font-size: 14px; color: var(--primary); font-weight: 500; }
+    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; margin: 3px 4px 3px 0; border-radius: 9999px; font-size: 13px; font-weight: 500; background: var(--bd-light); color: var(--tx-sub); border: 1px solid var(--bd); }
+    .chip.matched { background: var(--success-bg); color: var(--success); border-color: transparent; }
+    .chip.gap { background: var(--warning-bg); color: var(--warning); border-color: transparent; cursor: pointer; }
+    .chip .chip-del { background: none; border: 0; color: inherit; font-size: 15px; cursor: pointer; opacity: 0.6; }
+    .progress-box { margin: 10px 0; }
+    .progress-bar-bg { height: 8px; background: var(--bd-light); border-radius: 9999px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 9999px; background: var(--primary); transition: width 0.3s; }
+    .form-grid { display: grid; gap: 10px; margin-top: 14px; }
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    input, textarea { flex: 1 1 180px; min-width: 0; padding: 9px 12px; border: 1px solid var(--bd); border-radius: 8px; background: var(--card-bg); color: var(--tx); font-family: inherit; font-size: 14px; outline: none; }
+    input:focus, textarea:focus { border-color: var(--primary); }
+    textarea { width: 100%; min-height: 70px; resize: vertical; }
+    .btn { padding: 8px 14px; border: 0; border-radius: 8px; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-secondary { background: var(--bd-light); color: var(--tx); border: 1px solid var(--bd); }
+    .btn-ai { background: var(--ai-purple); color: #fff; }
+    .btn-sm { padding: 5px 9px; font-size: 12px; border-radius: 6px; }
+    .btn-danger { background: var(--danger-bg); color: var(--danger); }
+    .jd-box { background: var(--bd-light); border: 1px dashed var(--bd); border-radius: var(--radius); padding: 14px; margin: 14px 0; }
+    .ai-report-box { background: var(--ai-purple-soft); border: 1px solid var(--ai-purple); border-radius: var(--radius); padding: 16px; margin-top: 12px; font-size: 13.5px; line-height: 1.7; }
+    
+    /* 자기소개서 전용 카드 스타일 */
+    .cover-letter-box {
+      background: var(--card-bg);
+      border: 2px solid var(--ai-purple);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      margin-top: 14px;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+    .cover-letter-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px dashed var(--bd); padding-bottom: 10px; margin-bottom: 12px;
+    }
+
+    [contenteditable="true"] { outline: none; border-radius: 4px; padding: 2px 4px; }
+    [contenteditable="true"]:focus { background: rgba(37,99,235,0.08); }
+    #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+    .toast { background: #1e293b; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13.5px; opacity: 0; transform: translateY(10px); transition: all 0.2s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    footer { max-width: 960px; margin: 0 auto; padding: 28px 20px; font-size: 13px; color: var(--mu); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+
+    .btn { white-space: nowrap; }
+    nav { scrollbar-width: none; }
+    nav::-webkit-scrollbar { display: none; }
+    @media (max-width: 640px) {
+      .nav-inner { height: auto; flex-wrap: wrap; padding: 8px 0; row-gap: 6px; }
+      .nav-inner nav { order: 3; width: 100%; }
+    }
+    .chip.near { background: var(--primary-soft); color: var(--primary); border-color: transparent; }
+    [data-edit]:focus { background: rgba(37,99,235,0.08); }
+    body.view .btn-danger, body.view .btn-ai, body.view .form-grid, body.view .form-row, body.view .chip-del,
+    body.view .edit-only, body.view #status-box, body.view footer, body.view .cover-letter-header .btn { display: none !important; }
+    body.view [contenteditable], body.view .chip.gap { pointer-events: none; }
+
+    @media print {
+      header, footer, .btn, .form-grid, .form-row, .jd-box, #toast-container, .chip-del, #dr, #dq, #db, #status-box { display: none !important; }
+      body { background: #fff !important; color: #000 !important; }
+      .card { border: 1px solid #ccc !important; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <a href="#top" class="brand">CareerMatch AI</a>
+    <nav>
+      <a href="#history">이력</a>
+      <a href="#intro">자기소개 문답</a>
+      <a href="#about">보유 스킬</a>
+      <a href="#projects">프로젝트</a>
+      <a href="#career">진로 탐색</a>
+      <a href="#match">기업 매칭 & 자소서</a>
+    </nav>
+    <div style="display:flex; gap:6px;">
+      <button class="btn btn-secondary btn-sm" id="btn-view" title="편집 버튼을 숨기고 보여주기용 화면으로 전환">보기 모드</button>
+      <button class="btn btn-secondary btn-sm" id="btn-theme">🌙 테마</button>
+      <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ 인쇄</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- 프로필 요약 -->
+  <section id="top">
+    <h1 class="hero-title" contenteditable="true" data-k="name" title="클릭해서 수정"></h1>
+    <div class="hero-sub" contenteditable="true" data-k="sub" title="클릭해서 수정"></div>
+    <p class="hero-intro" contenteditable="true" data-k="intro" title="클릭해서 수정"></p>
+    <div class="best-banner">
+      <span>🎯</span> <span id="best-text">공고를 추가하면 내 스킬과 가장 잘 맞는 최적의 기업을 분석해 드립니다.</span>
+    </div>
+  </section>
+
+  <!-- 이력 -->
+  <section id="history">
+    <h2 style="font-size: 20px; margin-bottom: 12px;">🎓 학력 및 이력</h2>
+    <div id="hs-list"></div>
+    <div class="card form-grid" style="margin-top: 12px; background: var(--bd-light);">
+      <b style="font-size: 13.5px;">+ 새 이력 추가</b>
+      <div class="form-row">
+        <input id="ht" placeholder="기관명/활동명" />
+        <input id="hd" placeholder="기간 (예: 2025.07 ~ 2025.12)" style="max-width: 200px;" />
+      </div>
+      <input id="hn" placeholder="수행 내용 또는 성과 설명" />
+      <div style="text-align: right;">
+        <button class="btn btn-primary btn-sm" id="btn-add-hs">이력 추가</button>
+      </div>
+    </div>
+    <h3 style="font-size: 16px; margin: 22px 0 10px;">자격증</h3>
+    <div id="ct-list"></div>
+    <div class="form-row" style="margin-top: 10px;">
+      <input id="ctt" placeholder="자격명 (예: SQLD)" />
+      <input id="cto" placeholder="발급기관" style="max-width: 180px;" />
+      <input id="ctd" placeholder="취득일 (예: 2026.09)" style="max-width: 160px;" />
+      <button class="btn btn-primary btn-sm" id="btn-add-ct">자격증 추가</button>
+    </div>
+  </section>
+
+  <!-- 자기소개 문답 -->
+  <section id="intro">
+    <h2 style="font-size: 20px; margin-bottom: 12px;">📝 기본 자기소개 문답 (AI 자소서 생성 시 반영)</h2>
+    <div id="ab-list"></div>
+  </section>
+
+  <!-- 보유 스킬 -->
+  <section id="about">
+    <h2 style="font-size: 20px; margin-bottom: 12px;">🛠️ 보유 기술 스택</h2>
+    <div class="card">
+      <div id="sk-chips"></div>
+      <div class="form-row" style="margin-top: 14px;">
+        <input id="ski" placeholder="추가할 스킬 (쉼표로 구분 가능, 예: Docker, Redis)" />
+        <button class="btn btn-primary" id="skb">스킬 추가</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 프로젝트 -->
+  <section id="projects">
+    <h2 style="font-size: 20px; margin-bottom: 12px;">🚀 핵심 프로젝트</h2>
+    <div id="pj-list"></div>
+    <div class="card form-grid" style="margin-top: 14px;">
+      <b style="font-size: 14px;">+ 프로젝트 등록 / 수정</b>
+      <div class="form-row">
+        <input id="pt" placeholder="프로젝트 제목" />
+        <input id="ps" placeholder="기술 스택 (예: Java, Spring Boot, MySQL)" />
+      </div>
+      <textarea id="pm" placeholder="해결한 문제 및 구체적 성과 수치"></textarea>
+      <input id="pa" placeholder="AI 협업 또는 트러블슈팅 경험" />
+      <div style="text-align: right;">
+        <button class="btn btn-primary" id="pb">프로젝트 저장</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 진로 탐색 -->
+  <section id="career">
+    <h2 style="font-size: 20px; margin-bottom: 12px;">🧭 직무 적합도 탐색</h2>
+    <div id="roles-list"></div>
+  </section>
+
+  <!-- 기업 매칭 & AI 자기소개서 -->
+  <section id="match">
+    <h2 style="font-size: 20px; margin-bottom: 12px;">🏢 DART 기업 연동 및 AI 자기소개서 생성</h2>
+
+    <div class="card" id="status-box" style="margin-bottom: 14px; font-size: 13px;"></div>
+
+    <!-- DART 검색 -->
+    <div class="card edit-only">
+      <b style="font-size: 13.5px; margin-bottom: 6px; display: block;">1. DART 등록 기업 검색</b>
+      <div class="form-row">
+        <input id="dq" placeholder="회사명 입력 (예: 카카오, 삼성전자, 네이버)" />
+        <button class="btn btn-primary" id="db">DART 검색</button>
+      </div>
+      <div id="dr" style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;"></div>
+      <div id="company-card-view"></div>
+    </div>
+
+    <!-- 공고 등록 -->
+    <div class="card form-grid" style="margin-top: 14px;">
+      <b style="font-size: 14px;">2. 채용공고 등록 및 스킬 매칭</b>
+      <div class="form-row">
+        <input id="cc" placeholder="기업명 (DART 검색 시 자동 입력)" />
+        <input id="cr" placeholder="채용 직무 (예: 서버 백엔드 개발자)" />
+      </div>
+
+      <div class="jd-box">
+        <b style="font-size: 13px;">✨ 공고 본문(JD)에서 스킬 자동 추출</b>
+        <textarea id="jd-paste" placeholder="채용공고의 자격 요건이나 우대 사항 글을 여기에 붙여넣으세요." style="margin-top: 6px;"></textarea>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; flex-wrap: wrap; gap: 6px;">
+          <button class="btn btn-secondary btn-sm" id="btn-parse-jd" type="button">⚡ 본문에서 스킬 자동 추출</button>
+          <div style="display: flex; gap: 4px;">
+            <button class="btn btn-secondary btn-sm" type="button" onclick="applyPreset('backend')">Java백엔드</button>
+            <button class="btn btn-secondary btn-sm" type="button" onclick="applyPreset('frontend')">프론트엔드</button>
+            <button class="btn btn-secondary btn-sm" type="button" onclick="applyPreset('data')">데이터/AI</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size: 12.5px; font-weight: 600; color: var(--tx-sub); margin-bottom: 4px; display: block;">요구 기술 스택</label>
+        <input id="cs" placeholder="예: Java, Spring Boot, MySQL, REST API" />
+      </div>
+
+      <div style="text-align: right;">
+        <button class="btn btn-primary" id="cb">공고 분석 및 저장</button>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <h3 style="font-size: 18px; margin-bottom: 12px;">📊 공고별 매칭 및 AI 맞춤 자기소개서</h3>
+      <div id="posts-list"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div>
+    데이터는 브라우저 로컬에 저장됩니다.
+    <button class="btn btn-secondary btn-sm" id="btn-export" style="margin-left: 6px;">JSON 백업</button>
+    <button class="btn btn-secondary btn-sm" id="btn-import-trigger">복원</button>
+    <input type="file" id="file-import" accept=".json" style="display: none;" />
+  </div>
+  <button class="btn btn-danger btn-sm" id="rs">초기화</button>
+</footer>
+
+<div id="toast-container"></div>
+
+<script>
+var STORAGE_KEY = 'career-portfolio-v4';
+
+var DEFAULT_DATA = {
+  name: '박희성',
+  sub: '목원대학교 컴퓨터융합학과 4학년 · 백엔드/풀스택 준비 중 · phs0620@mokwon.ac.kr',
+  intro: 'Java 중심의 객체지향 기본기와 웹 프론트엔드 구조에 대한 이해를 바탕으로, 데이터가 사용자에게 정확히 전달되는 서비스를 만들고 싶은 개발자입니다.',
+  skills: ['Java', 'Spring', '객체지향 프로그래밍', '웹 프론트엔드', 'JavaScript', 'SQL', 'REST API', 'Git'],
+  history: [
+    { t: '인턴 · ㈜새온', d: '2026.07 ~ 2026.08', n: 'AI 자율주행 자동차 교육 자료 제작' },
+    { t: '웹 프론트엔드 과정 · 프로그래머스', d: '2025.07 ~ 2025.12', n: '웹 프론트엔드의 개발 구조와 동작 원리, 백엔드와 프론트엔드가 데이터를 주고받는 흐름 학습' },
+    { t: '목원대학교 컴퓨터융합학과', d: '2020.03 ~ 재학 중', n: '주전공 컴퓨터융합 · 직전 학기 성적 96/100' }
+  ],
+  certs: [
+    { t: '정보처리기사', o: 'Q-Net', d: '2026.09' }
+  ],
+  about: [
+    { q: '성장 과정', a: '저의 개발에 대한 관심은 유치원 시절, 부모님께서 사주신 저만의 컴퓨터를 처음 접하면서 시작되었습니다. 어린 나이였지만 화면 속 세상을 조작하는 과정에 큰 흥미를 느꼈고, 이는 단순한 호기심을 넘어 컴퓨터라는 도구를 이해하고 싶다는 열망으로 이어졌습니다.\n또한, "하고 싶은 일을 하라"시며 저의 선택을 전적으로 믿어주신 부모님의 교육관 덕분에, 저는 타의가 아닌 저 스스로의 의지로 개발자의 길을 선택했습니다. 스스로 결정했기에 학습 과정에서 마주하는 어려움 앞에서도 쉽게 포기하지 않고 주도적으로 해결책을 찾는 자세를 기를 수 있었습니다.' },
+    { q: '성격 및 장단점', a: "저의 가장 큰 장점은 '꼼꼼함'과 '경청'입니다. 팀 프로젝트 진행 시 동료들의 의견을 끝까지 주의 깊게 듣고 조율하는 역할을 주로 맡아왔습니다. 또한 개발에 있어서는 코드 한 줄의 오류도 놓치지 않으려는 꼼꼼함으로 완성도 높은 결과물을 만드는 데 기여합니다.\n반면, 한 가지 일에 깊게 몰입하면 피로감을 쉽게 느끼는 편입니다. 이를 보완하기 위해 저는 규칙적인 생활 패턴과 식단 관리를 통해 최상의 컨디션을 유지하려고 노력하고 있습니다." },
+    { q: '경험 및 경력사항', a: "학부 과정 동안 Java 언어를 중심으로 객체지향 프로그래밍의 기본기를 탄탄히 다지는 데 집중해 왔습니다. 개발의 본질인 코드를 통한 문제 해결을 중요하게 생각하며, 전공 수업 과제를 수행할 때마다 논리적인 로직 설계와 효율적인 구조를 고민하며 프로그래밍의 기초를 길렀습니다.\n이에 그치지 않고 프로그래머스에서 주관하는 '웹 프론트엔드 개발 과정'을 이수하며 역량을 확장했습니다. 이 과정을 통해 단순히 화면을 구성하는 것을 넘어, 웹 프론트엔드의 전반적인 개발 구조와 동작 원리를 깊이 있게 이해할 수 있었습니다. 특히 백엔드와 프론트엔드가 데이터를 주고받는 흐름을 파악하며, 사용자에게 데이터를 효과적으로 전달하기 위한 인터페이스 구성 능력을 익혔습니다." },
+    { q: '지원동기 및 입사 후 포부', a: '비정형 데이터를 AI로 분석하여 다차원 시각화 모델을 제시하는 귀하의 비전에 매료되었습니다. 저는 Java 백엔드 역량과 웹 프론트엔드에 대한 구조적 이해를 갖추고 있어, 귀사의 분석 모델을 구현할 적임자라 생각합니다.\n입사 후, 우선 귀사의 데이터 시각화 플랫폼 구조를 빠르게 파악하여 팀에 즉시 기여하겠습니다. 꼼꼼한 성격으로 시스템 안정성을 유지하며, 분석 결과가 사용자에게 완벽히 전달되도록 역할을 수행하겠습니다.' }
+  ],
+  projects: [
+    {
+      t: '기업 매칭 포트폴리오 웹 플랫폼',
+      s: ['HTML/CSS', 'JavaScript', 'Python', 'Open DART API', 'Gemini API', 'REST API'],
+      m: '진로 탐색과 기업 채용 요구사항을 한 곳에서 분석하는 포트폴리오 웹 서비스입니다. DART 기업 공시 정보와 Gemini AI 실시간 검색을 연동했습니다.',
+      a: 'AI 모델과의 협업을 통해 DART API 프록시 서버 및 채용공고 기술 스택 파서를 설계했습니다.'
+    }
+  ],
+  posts: [
+    {
+      c: '카카오',
+      r: '서버 백엔드 개발자',
+      q: ['Java', 'Spring', 'MySQL', 'REST API', 'Docker', 'Linux', 'Git'],
+      info: '대표 정신아 · 유가증권'
+    }
+  ]
+};
+
+var CAREER_ROLES = [
+  ['백엔드 개발자 (Java/Spring)', ['Java', 'Spring', 'SQL', 'REST API', 'MySQL', 'Git', 'Linux']],
+  ['프론트엔드 개발자 (React/Web)', ['HTML/CSS', 'JavaScript', 'React', 'TypeScript', 'REST API']],
+  ['풀스택 웹 개발자', ['Java', 'Spring', 'JavaScript', 'React', 'SQL', 'REST API', 'Git']],
+  ['AI 및 데이터 엔지니어', ['Python', 'SQL', '머신러닝', '데이터분석', 'REST API']]
+];
+
+var TECH_DICTIONARY = [
+  'Java', 'Spring', 'Spring Boot', 'JPA', 'Python', 'Django', 'FastAPI',
+  'JavaScript', 'TypeScript', 'React', 'Vue', 'Next.js', 'Node.js',
+  'HTML/CSS', 'SQL', 'MySQL', 'PostgreSQL', 'Oracle', 'Redis',
+  'AWS', 'Docker', 'Kubernetes', 'Linux', 'Git', 'REST API', 'Kafka'
+];
+
+var State = JSON.parse(JSON.stringify(DEFAULT_DATA));
+var LIST_KEYS = ['skills', 'history', 'certs', 'about', 'projects', 'posts'];
+try {
+  var saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) Object.assign(State, JSON.parse(saved));
+  else {
+    // 이전 버전에서 직접 추가한 스킬·프로젝트·공고는 그대로 가져오고, 이력과 자기소개는 이력서 내용으로 채웁니다.
+    var old = JSON.parse(localStorage.getItem('career-portfolio-v3') || 'null');
+    if (old) ['skills', 'projects', 'posts'].forEach(function(k) { if (Array.isArray(old[k])) State[k] = old[k]; });
+  }
+} catch(e) {}
+LIST_KEYS.forEach(function(k) { if (!Array.isArray(State[k])) State[k] = []; });
+
+function $(id) { return document.getElementById(id); }
+function norm(s) { return String(s || '').toLowerCase().replace(/[\s\-_.]/g, ''); }
+function escapeHtml(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+function splitComma(v) { return v.split(/[,/]+/).map(function(x){ return x.trim(); }).filter(Boolean); }
+
+function toast(msg) {
+  var container = $('toast-container');
+  var el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(function() { el.classList.add('show'); }, 20);
+  setTimeout(function() {
+    el.classList.remove('show');
+    setTimeout(function() { el.remove(); }, 300);
+  }, 2500);
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(State)); } catch(e) {}
+}
+
+var SKILL_ALIAS = {
+  '자바': 'java', 'js': 'javascript', '자바스크립트': 'javascript', 'ts': 'typescript', '타입스크립트': 'typescript',
+  '스프링': 'spring', '스프링부트': 'springboot', 'springframework': 'spring', '파이썬': 'python',
+  'reactjs': 'react', '리액트': 'react', 'node': 'nodejs', 'vuejs': 'vue', 'nextjs': 'next',
+  'rest': 'restapi', 'restful': 'restapi', 'restfulapi': 'restapi', '깃': 'git', 'github': 'git',
+  'html': 'html/css', 'css': 'html/css', 'html5': 'html/css', 'css3': 'html/css', 'htmlcss': 'html/css',
+  'postgres': 'postgresql', '리눅스': 'linux', '도커': 'docker', 'k8s': 'kubernetes', 'oop': '객체지향프로그래밍', '객체지향': '객체지향프로그래밍'
+};
+var SKILL_FAMILY = [
+  ['spring', 'springboot', 'jpa'],
+  ['sql', 'mysql', 'postgresql', 'oracle', 'mariadb', 'mssql'],
+  ['html/css', '웹프론트엔드'],
+  ['javascript', 'typescript'],
+  ['docker', 'kubernetes']
+];
+function canon(s) { var n = norm(s); return SKILL_ALIAS[n] || n; }
+function familyOf(c) {
+  for (var i = 0; i < SKILL_FAMILY.length; i++) if (SKILL_FAMILY[i].indexOf(c) >= 0) return i;
+  return -1;
+}
+function hasSkill(sk) {
+  var c = canon(sk);
+  return State.skills.some(function(s) { return canon(s) === c; });
+}
+// 요구 스킬과 정확히 같지는 않지만 같은 계열인 내 스킬을 돌려줍니다. (예: 요구 MySQL, 보유 SQL)
+function nearSkill(sk) {
+  var f = familyOf(canon(sk));
+  if (f < 0) return '';
+  return State.skills.find(function(s) { return familyOf(canon(s)) === f; }) || '';
+}
+function nearHtml(near) {
+  if (!near.length) return '';
+  return '<div style="font-size:12.5px; margin-top:4px;"><b style="color:var(--primary);">유사 보유(절반 인정):</b> ' +
+    near.map(function(n) { return '<span class="chip near">' + escapeHtml(n.q) + ' ← ' + escapeHtml(n.have) + '</span>'; }).join('') + '</div>';
+}
+function ed(key, i, field) { return 'contenteditable="true" title="클릭해서 수정" data-edit="' + key + '.' + i + '.' + field + '"'; }
+
+function addSkills(arr) {
+  var cnt = 0;
+  arr.forEach(function(sk) {
+    if (!hasSkill(sk)) { State.skills.push(sk); cnt++; }
+  });
+  if (cnt > 0) saveState();
+  return cnt;
+}
+
+function calcMatch(reqs) {
+  var out = { p: 0, matched: [], near: [], gap: [] };
+  if (!reqs || !reqs.length) return out;
+  reqs.forEach(function(q) {
+    if (hasSkill(q)) return out.matched.push(q);
+    var have = nearSkill(q);
+    if (have) out.near.push({ q: q, have: have }); else out.gap.push(q);
+  });
+  out.p = Math.round(((out.matched.length + out.near.length * 0.5) / reqs.length) * 100);
+  return out;
+}
+
+function renderAll() {
+  document.querySelectorAll('[data-k]').forEach(function(el) {
+    el.textContent = State[el.dataset.k] || '';
+  });
+
+  $('hs-list').innerHTML = State.history.map(function(h, i) {
+    return '<div class="card" style="padding:12px 16px;">' +
+      '<div style="display:flex; justify-content:space-between; align-items:baseline;">' +
+        '<b ' + ed('history', i, 't') + '>' + escapeHtml(h.t) + '</b>' +
+        '<div style="display:flex; align-items:center; gap:8px;">' +
+          '<span ' + ed('history', i, 'd') + ' style="font-size:12.5px; color:var(--mu);">' + escapeHtml(h.d) + '</span>' +
+          '<button class="btn btn-danger btn-sm" onclick="deleteItem(\'history\',' + i + ')">삭제</button>' +
+        '</div>' +
+      '</div>' +
+      '<div ' + ed('history', i, 'n') + ' style="font-size:13px; color:var(--tx-sub); margin-top:4px; min-height:1.2em;">' + escapeHtml(h.n) + '</div>' +
+    '</div>';
+  }).join('');
+
+  $('ct-list').innerHTML = State.certs.map(function(c, i) {
+    return '<div class="card" style="padding:10px 16px; display:flex; justify-content:space-between; align-items:center; gap:8px;">' +
+      '<div><b>' + escapeHtml(c.t) + '</b> <span style="font-size:12.5px; color:var(--mu);">' +
+        escapeHtml([c.o, c.d].filter(Boolean).join(' · ')) + '</span></div>' +
+      '<button class="btn btn-danger btn-sm" onclick="deleteItem(\'certs\',' + i + ')">삭제</button>' +
+    '</div>';
+  }).join('') || '<p style="color:var(--mu); font-size:13px;">등록된 자격증이 없습니다.</p>';
+
+  $('ab-list').innerHTML = State.about.map(function(ab, i) {
+    return '<div class="card" style="padding:14px 18px;">' +
+      '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">' +
+        '<b style="font-size:14px; color:var(--primary);">' + escapeHtml(ab.q) + '</b>' +
+        '<button class="btn btn-danger btn-sm" onclick="deleteItem(\'about\',' + i + ')">삭제</button>' +
+      '</div>' +
+      '<p ' + ed('about', i, 'a') + ' style="font-size:13.5px; color:var(--tx-sub); white-space:pre-wrap;">' + escapeHtml(ab.a) + '</p>' +
+    '</div>';
+  }).join('');
+
+  $('sk-chips').innerHTML = State.skills.map(function(s, i) {
+    return '<span class="chip">' + escapeHtml(s) +
+      '<button class="chip-del" onclick="deleteSkill(' + i + ')">&times;</button></span>';
+  }).join('') || '<span style="color:var(--mu); font-size:13px;">등록된 스킬이 없습니다.</span>';
+
+  $('pj-list').innerHTML = State.projects.map(function(p, i) {
+    return '<div class="card">' +
+      '<div style="display:flex; justify-content:space-between;">' +
+        '<b>' + escapeHtml(p.t) + '</b>' +
+        '<button class="btn btn-danger btn-sm" onclick="deleteItem(\'projects\',' + i + ')">삭제</button>' +
+      '</div>' +
+      '<div style="margin:6px 0;">' + p.s.map(function(tag){ return '<span class="chip">' + escapeHtml(tag) + '</span>'; }).join('') + '</div>' +
+      (p.m ? '<p style="font-size:13.5px; color:var(--tx-sub);">' + escapeHtml(p.m) + '</p>' : '') +
+      (p.a ? '<div style="margin-top:6px; font-size:12.5px; color:var(--mu);">🤖 AI 협업: ' + escapeHtml(p.a) + '</div>' : '') +
+    '</div>';
+  }).join('') || '<p style="color:var(--mu);">등록된 프로젝트가 없습니다.</p>';
+
+  var rolesSorted = CAREER_ROLES.map(function(item) {
+    var m = calcMatch(item[1]);
+    return { name: item[0], reqs: item[1], p: m.p, matched: m.matched, near: m.near, gap: m.gap };
+  }).sort(function(a, b) { return b.p - a.p; });
+
+  $('roles-list').innerHTML = rolesSorted.map(function(r) {
+    return '<div class="card" style="padding:14px 18px;">' +
+      '<div style="display:flex; justify-content:space-between;">' +
+        '<b>' + escapeHtml(r.name) + '</b>' +
+        '<span style="font-weight:700;">' + r.p + '%</span>' +
+      '</div>' +
+      '<div class="progress-box"><div class="progress-bar-bg"><div class="progress-bar-fill" style="width:' + r.p + '%;"></div></div></div>' +
+      '<div style="font-size:12.5px;">' +
+        '<span style="color:var(--success); font-weight:600;">보유:</span> ' +
+        (r.matched.map(function(m){ return '<span class="chip matched">' + escapeHtml(m) + '</span>'; }).join('') || '없음') +
+      '</div>' +
+      nearHtml(r.near) +
+      '<div style="font-size:12.5px; margin-top:4px;">' +
+        '<span style="color:var(--warning); font-weight:600;">보완:</span> ' +
+        (r.gap.map(function(g){ return '<span class="chip gap" onclick="quickAddSkill(\'' + escapeHtml(g) + '\')">+ ' + escapeHtml(g) + '</span>'; }).join('') || '완료') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var postsWithMatch = State.posts.map(function(post, index) {
+    return { ...post, index: index, match: calcMatch(post.q) };
+  }).sort(function(a, b) { return b.match.p - a.match.p; });
+
+  $('posts-list').innerHTML = postsWithMatch.map(function(p) {
+    return '<div class="card">' +
+      '<div style="display:flex; justify-content:space-between; align-items:flex-start;">' +
+        '<div>' +
+          '<b>' + escapeHtml(p.c) + '</b> <span style="font-size:13px; color:var(--mu);">' + escapeHtml(p.r) + '</span>' +
+          (p.info ? '<div style="font-size:12px; color:var(--mu);">' + escapeHtml(p.info) + '</div>' : '') +
+        '</div>' +
+        '<div style="text-align:right;">' +
+          '<span style="font-size:18px; font-weight:700; color:var(--primary);">' + p.match.p + '%</span><br/>' +
+          '<button class="btn btn-danger btn-sm" onclick="deleteItem(\'posts\',' + p.index + ')">삭제</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="progress-box"><div class="progress-bar-bg"><div class="progress-bar-fill" style="width:' + p.match.p + '%;"></div></div></div>' +
+      '<div style="font-size:12.5px;">' +
+        '<b style="color:var(--success);">충족:</b> ' +
+        (p.match.matched.map(function(s){ return '<span class="chip matched">✓ ' + escapeHtml(s) + '</span>'; }).join('') || '없음') +
+      '</div>' +
+      nearHtml(p.match.near) +
+      '<div style="font-size:12.5px; margin-top:4px;">' +
+        '<b style="color:var(--warning);">보완:</b> ' +
+        (p.match.gap.map(function(s){ return '<span class="chip gap" onclick="quickAddSkill(\'' + escapeHtml(s) + '\')">+ ' + escapeHtml(s) + '</span>'; }).join('') || '모두 충족') +
+      '</div>' +
+      '<div style="margin-top:12px; border-top:1px dashed var(--bd); padding-top:10px; display:flex; justify-content:space-between; align-items:center;">' +
+        '<span class="edit-only" style="font-size:12.5px; color:var(--mu);">내 포트폴리오 기반 맞춤 서류 준비:</span>' +
+        '<button class="btn btn-ai btn-sm" onclick="generateCoverLetter(' + p.index + ')">✍️ AI 맞춤 자기소개서 생성</button>' +
+      '</div>' +
+      (p.cover_letter ? renderCoverLetterBox(p.cover_letter, p.index, p.c) : '<div id="cl-view-' + p.index + '"></div>') +
+    '</div>';
+  }).join('') || '<p style="color:var(--mu);">저장된 공고가 없습니다.</p>';
+
+  if (postsWithMatch.length > 0 && postsWithMatch[0].match.p > 0) {
+    var topPost = postsWithMatch[0];
+    $('best-text').innerHTML = '내 스킬과 가장 잘 맞는 공고: <b>' + escapeHtml(topPost.c) + ' (' + topPost.match.p + '%)</b>';
+  }
+
+  saveState();
+}
+
+function renderCoverLetterBox(text, index, corpName) {
+  var formatted = escapeHtml(text)
+    .replace(/### (.*?)\n/g, '<h4 style="color:var(--ai-purple); margin-top:14px; margin-bottom:4px;">$1</h4>')
+    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/\n/g, '<br/>');
+
+  return '<div class="cover-letter-box" id="cl-view-' + index + '">' +
+    '<div class="cover-letter-header">' +
+      '<b style="color:var(--ai-purple); font-size:15px;">📄 ' + escapeHtml(corpName) + ' 맞춤형 자기소개서</b>' +
+      '<div style="display:flex; gap:6px;">' +
+        '<button class="btn btn-secondary btn-sm" onclick="copyCoverLetter(' + index + ')">📋 전체 복사</button>' +
+        '<button class="btn btn-ai btn-sm" onclick="generateCoverLetter(' + index + ')">🔄 다시 생성</button>' +
+      '</div>' +
+    '</div>' +
+    '<div contenteditable="true" onblur="saveEditedCoverLetter(' + index + ', this.innerText)" style="outline:none; white-space:pre-wrap; line-height:1.75;">' +
+      escapeHtml(text) +
+    '</div>' +
+    '<div style="font-size:12px; color:var(--mu); margin-top:8px;">💡 위 내용을 클릭하여 직접 편집할 수 있으며, 편집 내용은 자동 저장됩니다.</div>' +
+  '</div>';
+}
+
+function generateCoverLetter(postIndex) {
+  var post = State.posts[postIndex];
+  var targetEl = $('cl-view-' + postIndex);
+  if (targetEl) {
+    targetEl.innerHTML = '<div class="ai-report-box" style="margin-top:10px;">🤖 Gemini가 지원자의 프로젝트 경험과 기업 요구사항을 분석하여 맞춤 자기소개서를 작성 중입니다... (약 5~10초 소요)</div>';
+  }
+
+  fetch('/api/gemini/cover-letter', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user: State, target: post })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.error) throw new Error(d.error);
+    State.posts[postIndex].cover_letter = d.cover_letter;
+    saveState();
+    renderAll();
+    toast("'" + post.c + "' 맞춤형 자기소개서가 완성되었습니다!");
+  })
+  .catch(function(err) {
+    if (targetEl) {
+      targetEl.innerHTML = '<div class="ai-report-box" style="border-color:var(--danger); color:var(--danger); margin-top:10px;">생성 실패: ' + escapeHtml(err.message) + '</div>';
+    }
+  });
+}
+
+function saveEditedCoverLetter(postIndex, newText) {
+  State.posts[postIndex].cover_letter = newText.trim();
+  saveState();
+  toast('자기소개서 수정 내용이 저장되었습니다.');
+}
+
+function copyCoverLetter(postIndex) {
+  var text = State.posts[postIndex].cover_letter || '';
+  navigator.clipboard.writeText(text).then(function() {
+    toast('자기소개서 전문이 클립보드에 복사되었습니다!');
+  });
+}
+
+document.querySelectorAll('[data-k]').forEach(function(el) {
+  el.onblur = function() {
+    State[el.dataset.k] = el.textContent.trim();
+    saveState();
+  };
+  el.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } };
+});
+
+$('skb').onclick = function() {
+  var val = $('ski').value.trim();
+  if (!val) return;
+  addSkills(splitComma(val));
+  $('ski').value = '';
+  renderAll();
+};
+$('ski').onkeydown = function(e) { if (e.key === 'Enter') $('skb').click(); };
+
+function deleteSkill(idx) {
+  State.skills.splice(idx, 1);
+  renderAll();
+}
+
+function quickAddSkill(sk) {
+  if (confirm("'" + sk + "' 스킬을 내 보유 스킬에 추가하시겠습니까?")) {
+    addSkills([sk]);
+    renderAll();
+    toast("'" + sk + "' 스킬이 추가되었습니다.");
+  }
+}
+
+$('btn-add-hs').onclick = function() {
+  var t = $('ht').value.trim();
+  var d = $('hd').value.trim();
+  var n = $('hn').value.trim();
+  if (!t) return alert('활동/기관명을 입력하세요.');
+  State.history.unshift({ t: t, d: d, n: n });
+  $('ht').value = ''; $('hd').value = ''; $('hn').value = '';
+  renderAll();
+};
+
+$('btn-add-ct').onclick = function() {
+  var t = $('ctt').value.trim();
+  if (!t) return alert('자격명을 입력하세요.');
+  State.certs.push({ t: t, o: $('cto').value.trim(), d: $('ctd').value.trim() });
+  $('ctt').value = ''; $('cto').value = ''; $('ctd').value = '';
+  renderAll();
+};
+
+$('pb').onclick = function() {
+  var t = $('pt').value.trim();
+  if (!t) return alert('프로젝트 제목을 입력하세요.');
+  var s = splitComma($('ps').value);
+  var m = $('pm').value.trim();
+  var a = $('pa').value.trim();
+
+  var idx = State.projects.findIndex(function(p){ return p.t === t; });
+  if (idx >= 0) State.projects[idx] = { t: t, s: s, m: m, a: a };
+  else State.projects.unshift({ t: t, s: s, m: m, a: a });
+
+  addSkills(s);
+  $('pt').value = ''; $('ps').value = ''; $('pm').value = ''; $('pa').value = '';
+  renderAll();
+};
+
+$('cb').onclick = function() {
+  var c = $('cc').value.trim();
+  var r = $('cr').value.trim();
+  var q = splitComma($('cs').value);
+  if (!c) return alert('기업명을 입력하세요.');
+  if (!q.length) return alert('요구 스킬을 최소 1개 이상 입력하세요.');
+
+  var idx = State.posts.findIndex(function(p){ return p.c === c && p.r === r; });
+  if (idx >= 0) State.posts[idx].q = q;
+  else State.posts.unshift({ c: c, r: r, q: q, info: window._selectedCompanyInfo || '' });
+
+  $('cc').value = ''; $('cr').value = ''; $('cs').value = ''; $('jd-paste').value = '';
+  $('company-card-view').innerHTML = '';
+  window._selectedCompanyInfo = '';
+  renderAll();
+};
+
+function deleteItem(key, idx) {
+  if (confirm('삭제하시겠습니까?')) {
+    State[key].splice(idx, 1);
+    renderAll();
+  }
+}
+
+$('btn-parse-jd').onclick = function() {
+  var text = $('jd-paste').value.trim();
+  if (!text) return alert('공고 본문을 입력해 주세요.');
+
+  var detected = [];
+  TECH_DICTIONARY.forEach(function(tech) {
+    var escaped = tech.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var reg = new RegExp('(^|[^a-zA-Z0-9#+])' + escaped + '([^a-zA-Z0-9#+]|$)', 'i');
+    if (reg.test(text) && !detected.includes(tech)) detected.push(tech);
+  });
+
+  if (!detected.length) return alert('인식된 기술 스택이 없습니다. 직접 입력창에 작성하세요.');
+  var existing = splitComma($('cs').value);
+  var merged = Array.from(new Set(existing.concat(detected)));
+  $('cs').value = merged.join(', ');
+  toast(detected.length + '개의 기술 스택을 자동 추출했습니다!');
+};
+
+function applyPreset(type) {
+  var presets = {
+    backend: ['Java', 'Spring Boot', 'MySQL', 'REST API', 'Git', 'Linux'],
+    frontend: ['JavaScript', 'TypeScript', 'React', 'HTML/CSS', 'REST API'],
+    data: ['Python', 'SQL', 'FastAPI', 'Docker', '머신러닝']
+  };
+  $('cs').value = (presets[type] || []).join(', ');
+}
+
+function callDartApi(path) {
+  return fetch('/api/dart/' + path)
+    .then(function(res) {
+      return res.json().catch(function() { return {}; }).then(function(j) {
+        if (!res.ok) throw new Error(j.error || '서버 응답 오류 (' + res.status + ')');
+        return j;
+      });
+    }, function() {
+      throw new Error(location.protocol === 'file:'
+        ? 'index.html을 직접 열면 연동되지 않습니다. start.bat을 실행한 뒤 http://localhost:8000 으로 접속하세요.'
+        : '서버에 연결할 수 없습니다. server.py 창이 켜져 있는지 확인하세요.');
+    });
+}
+
+$('db').onclick = function() {
+  var q = $('dq').value.trim();
+  if (!q) return alert('기업명을 입력하세요.');
+  $('dr').innerHTML = '<span style="color:var(--mu); font-size:13px;">DART에서 검색 중...</span>';
+
+  callDartApi('search?q=' + encodeURIComponent(q))
+    .then(function(list) {
+      if (!list || !list.length) {
+        $('dr').innerHTML = '<span style="color:var(--mu); font-size:13px;">검색 결과가 없습니다.</span>';
+        return;
+      }
+      $('dr').innerHTML = list.map(function(c) {
+        return '<button class="btn btn-secondary btn-sm" onclick="selectCompany(\'' + escapeHtml(c.corp_code) + '\')">' +
+          escapeHtml(c.corp_name) + (c.stock_code ? ' (' + escapeHtml(c.stock_code) + ')' : '') +
+        '</button>';
+      }).join('');
+    })
+    .catch(function(err) {
+      $('dr').innerHTML = '<span style="color:var(--danger); font-size:13px;">연결 실패: ' + escapeHtml(err.message) + '</span>';
+    });
+};
+$('dq').onkeydown = function(e) { if (e.key === 'Enter') $('db').click(); };
+
+function selectCompany(code) {
+  $('company-card-view').innerHTML = '<span style="color:var(--mu); font-size:13px;">기업 정보 로딩 중...</span>';
+  callDartApi('company?corp_code=' + code)
+    .then(function(c) {
+      var clsMap = { Y: '유가증권', K: '코스닥', N: '코넥스', E: '기타' };
+      var market = clsMap[c.corp_cls] || '기타';
+
+      $('company-card-view').innerHTML = '<div class="card" style="margin-top:10px; border-color:var(--primary);">' +
+        '<div style="font-weight:700; color:var(--primary); font-size:15px; margin-bottom:4px;">🏢 ' + escapeHtml(c.corp_name) + ' (' + market + ')</div>' +
+        '<div style="font-size:13px;">대표자: ' + escapeHtml(c.ceo_nm || '-') + ' | 설립일: ' + escapeHtml(c.est_dt || '-') + '</div>' +
+        '<div style="font-size:13px;">주소: ' + escapeHtml(c.adres || '-') + '</div>' +
+        (c.hm_url ? '<div style="font-size:13px;">홈페이지: <a href="' + escapeHtml(c.hm_url) + '" target="_blank">' + escapeHtml(c.hm_url) + '</a></div>' : '') +
+        '<div style="margin-top:8px; border-top:1px dashed var(--bd); padding-top:8px;">' +
+          '<button class="btn btn-ai btn-sm" onclick="fetchGeminiInsight(window._selectedCompanyName)">🤖 Gemini 실시간 기업·기술스택 심층 분석</button>' +
+        '</div>' +
+      '</div><div id="gemini-view"></div>';
+
+      $('cc').value = c.corp_name;
+      window._selectedCompanyName = c.corp_name;
+      window._selectedCompanyInfo = (c.ceo_nm ? '대표 ' + c.ceo_nm : '') + ' · ' + market;
+      $('cr').focus();
+    })
+    .catch(function(err) {
+      $('company-card-view').innerHTML = '<span style="color:var(--danger); font-size:13px;">조회 실패: ' + escapeHtml(err.message) + '</span>';
+    });
+}
+
+function fetchGeminiInsight(name) {
+  var v = $('gemini-view');
+  v.innerHTML = '<div class="ai-report-box">🔍 Gemini가 ' + escapeHtml(name) + '의 최신 채용 공고와 기술 블로그를 실시간 검색 중입니다...</div>';
+
+  fetch('/api/gemini/insights?corp_name=' + encodeURIComponent(name))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.error) throw new Error(d.error);
+      var text = escapeHtml(d.report).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br/>');
+      v.innerHTML = '<div class="ai-report-box"><b style="color:var(--ai-purple);">✨ Gemini 실시간 분석: ' + escapeHtml(name) + '</b><div style="margin-top:6px;">' + text + '</div></div>';
+    })
+    .catch(function(err) {
+      v.innerHTML = '<div class="ai-report-box" style="border-color:var(--danger); color:var(--danger);">Gemini 분석 실패: ' + escapeHtml(err.message) + '</div>';
+    });
+}
+
+document.addEventListener('focusout', function(e) {
+  var path = e.target && e.target.dataset && e.target.dataset.edit;
+  if (!path) return;
+  var a = path.split('.'), item = (State[a[0]] || [])[+a[1]];
+  var val = e.target.innerText.replace(/\n{3,}/g, '\n\n').trim();
+  if (!item || item[a[2]] === val) return;
+  item[a[2]] = val;
+  saveState();
+  toast('수정 내용을 저장했습니다.');
+});
+
+function pref(key, val) {
+  try { if (val === undefined) return localStorage.getItem(key); localStorage.setItem(key, val); } catch(e) { return null; }
+}
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  $('btn-theme').textContent = t === 'dark' ? '☀️ 테마' : '🌙 테마';
+}
+setTheme(pref('pf-theme') || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+$('btn-theme').onclick = function() {
+  var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  setTheme(next); pref('pf-theme', next);
+};
+function setView(on) {
+  document.body.classList.toggle('view', on);
+  $('btn-view').textContent = on ? '편집 모드' : '보기 모드';
+}
+setView(pref('pf-view') === '1');
+$('btn-view').onclick = function() {
+  var on = !document.body.classList.contains('view');
+  setView(on); pref('pf-view', on ? '1' : '0');
+};
+
+$('btn-export').onclick = function() {
+  var blob = new Blob([JSON.stringify(State, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'portfolio.json';
+  a.click();
+};
+
+$('btn-import-trigger').onclick = function() { $('file-import').click(); };
+$('file-import').onchange = function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      State = Object.assign(JSON.parse(JSON.stringify(DEFAULT_DATA)), JSON.parse(ev.target.result));
+      LIST_KEYS.forEach(function(k) { if (!Array.isArray(State[k])) State[k] = []; });
+      renderAll();
+      toast('데이터가 복원되었습니다.');
+    } catch(err) { alert('유효하지 않은 파일입니다.'); }
+  };
+  reader.readAsText(file);
+};
+
+$('rs').onclick = function() {
+  if (confirm('초기화하시겠습니까?')) {
+    localStorage.removeItem(STORAGE_KEY);
+    State = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    renderAll();
+  }
+};
+
+function checkStatus() {
+  var box = $('status-box');
+  var retry = '<div style="text-align:right; margin-top:6px;"><button class="btn btn-secondary btn-sm" onclick="checkStatus()">다시 확인</button></div>';
+  if (location.protocol === 'file:') {
+    box.innerHTML = '<b style="color:var(--danger);">index.html 파일을 직접 열었습니다.</b> 이렇게 열면 DART와 Gemini 연동이 작동하지 않습니다. ' +
+      'start.bat을 더블클릭해 서버를 켠 뒤 <b>http://localhost:8000</b> 으로 접속하세요.';
+    return;
+  }
+  box.innerHTML = '<span style="color:var(--mu);">DART·Gemini 연결 상태를 확인하는 중...</span>';
+  fetch('/api/status').then(function(r) { return r.json(); }).then(function(s) {
+    function row(name, o) {
+      return '<div><b style="color:var(--' + (o.ok ? 'success' : 'danger') + ');">' + name + ' ' + (o.ok ? '연결됨' : '오류') + '</b> · ' + escapeHtml(o.msg || '') + '</div>';
+    }
+    box.innerHTML = row('DART', s.dart) + row('Gemini', s.gemini) + retry;
+  }).catch(function() {
+    box.innerHTML = '<b style="color:var(--danger);">서버에 연결할 수 없습니다.</b> server.py 창이 켜져 있는지 확인하세요.' + retry;
+  });
+}
+
+renderAll();
+checkStatus();
+</script>
+</body>
+</html>
