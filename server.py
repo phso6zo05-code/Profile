@@ -367,7 +367,8 @@ def cover_letter_prompt(p):
 
 
 # ---------------------------------------------------------------- 배포(공개 서버) 보호
-PUBLIC = bool(os.environ.get("RENDER") or os.environ.get("PUBLIC"))  # Render는 RENDER=true 를 자동으로 넣어줌
+# Render는 RENDER=true 를 자동으로 넣어줌. Windows에는 PUBLIC=C:\Users\Public 이 기본으로 있으므로 값까지 확인
+PUBLIC = bool(os.environ.get("RENDER")) or os.environ.get("PUBLIC", "").lower() in ("1", "true", "yes")
 LIMITS = {"gemini": (8, 3600), "dart": (60, 600), "login": (5, 600)}  # 방문자 1명(IP)당 (횟수, 초). 내 API 한도를 남이 다 쓰지 못하게 함
 _hits, _hits_lock = {}, threading.Lock()
 
