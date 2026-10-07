@@ -124,24 +124,36 @@ def employees(corp_code):
         raise RuntimeError("최근 3년 사업보고서에 직원 현황이 없습니다. (사업보고서를 내지 않는 비상장사일 수 있습니다)")
     is_total = lambda r: any(k in (r.get("fo_bbm") or "") + (r.get("sexdstn") or "") for k in ("합계", "총계")) or (r.get("sexdstn") or "").strip() == "계"
     part = [r for r in rows if not is_total(r)] or rows  # 합계 행이 섞여 있으면 중복 계산을 막기 위해 제외
-    total = regular = contract = 0
-    t_sum = t_w = pay_sum = s_sum = s_w = 0.0
-    for r in part:
-        n = _num(r.get("sm")) or 0
-        total += n
-        regular += _num(r.get("rgllbr_co")) or 0
-        contract += _num(r.get("cnttk_co")) or 0
-        t = _tenure(r.get("avrg_cnwk_sdytrn"))
-        if t is not None and n:
-            t_sum += t * n; t_w += n
-        s = _won(_num(r.get("jan_salary_am")))
-        if s and n:
-            s_sum += s * n; s_w += n
+    def wavg(rs, get):  # 인원수로 가중 평균
+        num = den = 0.0
+        for r in rs:
+            n, v = _num(r.get("sm")) or 0, get(r)
+            if v and n:
+                num += v * n; den += n
+        return num / den if den else None
+
+    total = sum(_num(r.get("sm")) or 0 for r in part)
+    regular = sum(_num(r.get("rgllbr_co")) or 0 for r in part)
+    contract = sum(_num(r.get("cnttk_co")) or 0 for r in part)
+    totals = [r for r in rows if is_total(r)]
+    pay = lambda r: _won(_num(r.get("jan_salary_am")))
+    ten = lambda r: _tenure(r.get("avrg_cnwk_sdytrn"))
+    # 급여·근속을 부문별이 아니라 합계 행에만 적는 회사가 있어서, 부문 행에 없으면 합계 행에서 가져옴
+    tenure = wavg(part, ten) or wavg(totals, ten)
+    salary = wavg(part, pay) or wavg(totals, pay)
+    if not salary:  # 그래도 없으면 연간 급여 총액 ÷ 직원 수
+        for rs in (part, totals):
+            amt = sum(_num(r.get("fyer_salary_totamt")) or 0 for r in rs)
+            n = sum(_num(r.get("sm")) or 0 for r in rs)
+            if amt and n:
+                per = amt / n
+                salary = per * 1000000 if per < 10000 else per * 1000 if per < 10000000 else per
+                break
     return {
         "year": used, "stlm_dt": rows[0].get("stlm_dt", ""), "rcept_no": rows[0].get("rcept_no", ""),
         "total": int(total) or None, "regular": int(regular) or None, "contract": int(contract) or None,
-        "tenure": round(t_sum / t_w, 1) if t_w else None,
-        "salary": int(round(s_sum / s_w, -4)) if s_w else None,  # 인원 가중 평균, 만원 단위로 반올림
+        "tenure": round(tenure, 1) if tenure else None,
+        "salary": int(round(salary, -4)) if salary else None,  # 인원 가중 평균, 만원 단위로 반올림
     }
 
 
