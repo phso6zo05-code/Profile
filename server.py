@@ -251,7 +251,7 @@ def gemini_models():
             n = m.get("name", "").replace("models/", "")
             if "generateContent" in m.get("supportedGenerationMethods", []) and n.startswith("gemini"):
                 names.append(n)
-        skip = ("image", "tts", "audio", "live", "embedding", "vision", "robotics", "computer")
+        skip = ("image", "tts", "audio", "live", "embedding", "vision", "robotics", "computer", "transcribe", "banana", "customtools")
         names = [n for n in names if not any(s in n for s in skip)]
 
         def rank(n):  # 안정판 flash 우선, 그다음 버전이 높은 순
@@ -268,30 +268,35 @@ def gemini_text(res):
 
 
 _good_model = None  # 마지막으로 성공한 모델을 다음에 먼저 시도
+_no_search_until = 0  # 검색 기능 할당량이 없으면(429) 이 시각까지 검색 없이 요청
 
 
 def ask_gemini(prompt, search=False):
-    """모델이 혼잡(503 등)하면 잠깐 기다렸다 한 번 더 해 보고, 그래도 안 되면 다른 모델로 넘어갑니다."""
-    global _good_model
+    """모델이 혼잡(503 등)하면 잠깐 기다렸다 한 번 더 해 보고, 그래도 안 되면 다른 모델로 넘어갑니다.
+    구글 검색 기능을 못 쓰면(무료 키는 검색 할당량이 없는 경우가 많음) 검색 없이 다시 요청합니다."""
+    global _good_model, _no_search_until
     if not GEMINI_KEY:
         raise RuntimeError(".env 파일에 GEMINI_API_KEY가 없습니다.")
+    models = gemini_models()
+    full = [m for m in models if "lite" not in m][:4]
+    lite = [m for m in models if "lite" in m][:2]  # 큰 모델이 모두 혼잡할 때 가벼운 모델이 대신 응답하는 경우가 많음
     order = []
-    for m in [_good_model, GEMINI_MODEL] + gemini_models():
+    for m in [_good_model, GEMINI_MODEL] + full + lite:
         if m and m not in order:
             order.append(m)
     if not order:
         raise RuntimeError("이 Gemini 키로 사용할 수 있는 모델이 없습니다.")
     deadline = time.time() + 80  # 전체 대기 시간 한도(초)
-    busy, other = [], ""
-    for model in order[:6]:
-        with_search, attempt = search, 0
+    busy, quota, other = [], [], ""
+    for model in order:
+        with_search, attempt = search and time.time() >= _no_search_until, 0
         while time.time() < deadline:
             attempt += 1
             body = {"contents": [{"parts": [{"text": prompt}]}]}
             if with_search:
                 body["tools"] = [{"google_search": {}}]
             try:
-                left = max(10, min(60, deadline - time.time()))
+                left = max(10, min(40, deadline - time.time()))  # 한 모델이 오래 붙잡고 있으면 다음 모델로
                 text = gemini_text(gemini_http("models/%s:generateContent" % model, body, timeout=left))
                 if text:
                     _good_model = model
@@ -299,17 +304,26 @@ def ask_gemini(prompt, search=False):
                 other = "%s: 빈 응답" % model
                 break
             except GeminiError as e:
+                if with_search and (e.code == 429 or e.code not in BUSY):  # 검색 할당량 없음·검색 미지원: 검색 없이 한 번 더
+                    if e.code == 429:
+                        _no_search_until = time.time() + 3600
+                    with_search, attempt = False, 0
+                    continue
+                if e.code == 429 and "quota" in str(e).lower():  # 이 모델의 할당량 소진: 기다려도 소용없으니 바로 다음 모델
+                    quota.append(model)
+                    break
+                if e.code == 404 and model in models:  # 목록에는 있지만 종료된 모델
+                    models.remove(model)
                 if e.code in BUSY:
                     if attempt == 1:
                         time.sleep(3)  # 같은 모델로 한 번만 더
                         continue
                     busy.append(model)
                     break
-                if with_search:  # 검색 기능을 못 쓰는 모델이면 검색 없이 한 번 더
-                    with_search, attempt = False, 0
-                    continue
                 other = "%s: %s" % (model, hide(e))
                 break
+    if quota and not busy:
+        raise RuntimeError("이 Gemini 키의 사용 할당량을 모두 썼습니다. 내일 다시 시도하거나 Google AI Studio에서 요금제를 확인하세요. (시도한 모델: %s)" % ", ".join(quota))
     if busy:
         raise RuntimeError("지금 Gemini 서버가 혼잡해서 응답을 받지 못했습니다. 1~2분 뒤에 다시 눌러 주세요. (시도한 모델: %s)" % ", ".join(busy))
     raise RuntimeError(other or "Gemini 응답을 받지 못했습니다.")

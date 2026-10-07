@@ -606,17 +606,15 @@ function generateCoverLetter(postIndex) {
   var post = State.posts[postIndex];
   var targetEl = $('cl-view-' + postIndex);
   if (targetEl) {
-    targetEl.innerHTML = '<div class="ai-report-box" style="margin-top:10px;">🤖 Gemini가 지원자의 프로젝트 경험과 기업 요구사항을 분석하여 맞춤 자기소개서를 작성 중입니다... (약 5~10초 소요)</div>';
+    targetEl.innerHTML = '<div class="ai-report-box" style="margin-top:10px;">🤖 Gemini가 지원자의 프로젝트 경험과 기업 요구사항을 분석하여 맞춤 자기소개서를 작성 중입니다... (보통 30초, 혼잡하면 1분 정도 걸립니다)</div>';
   }
 
-  fetch('/api/gemini/cover-letter', {
+  callApi('/api/gemini/cover-letter', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user: State, target: post })
   })
-  .then(function(r) { return r.json(); })
   .then(function(d) {
-    if (d.error) throw new Error(d.error);
     State.posts[postIndex].cover_letter = d.cover_letter;
     saveState();
     renderAll();
@@ -759,12 +757,14 @@ function applyPreset(type) {
   $('cs').value = (presets[type] || []).join(', ');
 }
 
-function callDartApi(path) {
-  return fetch('/api/dart/' + path)
+function callApi(url, opts) {
+  return fetch(url, opts)
     .then(function(res) {
       if (res.status === 401) { location.href = '/login'; throw new Error('로그인이 만료되었습니다.'); }
-      return res.json().catch(function() { return {}; }).then(function(j) {
-        if (!res.ok) throw new Error(j.error || '서버 응답 오류 (' + res.status + ')');
+      return res.json().catch(function() { return null; }).then(function(j) {
+        // JSON이 아니면 서버 앞단(Render 등)의 오류 페이지: 재배포·시작 중이거나 응답이 너무 오래 걸린 경우
+        if (!j) throw new Error('서버가 잠시 응답하지 못했습니다 (' + res.status + '). 서버가 다시 켜지는 중일 수 있으니 1분 뒤에 다시 눌러 주세요.');
+        if (!res.ok || j.error) throw new Error(j.error || '서버 응답 오류 (' + res.status + ')');
         return j;
       });
     }, function() {
@@ -772,6 +772,10 @@ function callDartApi(path) {
         ? 'index.html을 직접 열면 연동되지 않습니다. start.bat을 실행한 뒤 http://localhost:8000 으로 접속하세요.'
         : '서버에 연결할 수 없습니다. server.py 창이 켜져 있는지 확인하세요.');
     });
+}
+
+function callDartApi(path) {
+  return callApi('/api/dart/' + path);
 }
 
 $('db').onclick = function() {
@@ -860,12 +864,10 @@ function selectCompany(code) {
 
 function fetchGeminiInsight(name) {
   var v = $('gemini-view');
-  v.innerHTML = '<div class="ai-report-box">🔍 Gemini가 ' + escapeHtml(name) + '의 최신 채용 공고와 기술 블로그를 실시간 검색 중입니다...</div>';
+  v.innerHTML = '<div class="ai-report-box">🔍 Gemini가 ' + escapeHtml(name) + '을(를) 분석 중입니다... (보통 30초, 혼잡하면 1분 정도 걸립니다)</div>';
 
-  fetch('/api/gemini/insights?corp_name=' + encodeURIComponent(name))
-    .then(function(r) { return r.json(); })
+  callApi('/api/gemini/insights?corp_name=' + encodeURIComponent(name))
     .then(function(d) {
-      if (d.error) throw new Error(d.error);
       var text = escapeHtml(d.report).replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br/>');
       v.innerHTML = '<div class="ai-report-box"><b style="color:var(--ai-purple);">✨ Gemini 실시간 분석: ' + escapeHtml(name) + '</b><div style="margin-top:6px;">' + text + '</div></div>';
     })
