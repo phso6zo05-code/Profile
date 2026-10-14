@@ -127,6 +127,7 @@
     body.view .btn-danger, body.view .btn-ai, body.view .form-grid, body.view .form-row, body.view .chip-del,
     body.view .edit-only, body.view #status-box, body.view footer, body.view .cover-letter-header .btn { display: none !important; }
     body.view [contenteditable], body.view .chip.gap { pointer-events: none; }
+    body.view .dart-row { display: flex !important; }  /* 보기 모드에서도 DART 검색창은 보이게 */
 
     @media print {
       header, footer, .btn, .form-grid, .form-row, .jd-box, #toast-container, .chip-del, #dr, #dq, #db, #status-box { display: none !important; }
@@ -244,7 +245,7 @@
     <!-- DART 검색: 보기 모드(배포 주소)에서도 보이도록 edit-only를 붙이지 않음 -->
     <div class="card">
       <b style="font-size: 13.5px; margin-bottom: 6px; display: block;">1. DART 등록 기업 검색</b>
-      <div class="form-row">
+      <div class="form-row dart-row">
         <input id="dq" placeholder="회사명 입력 (예: 카카오, 삼성전자, 네이버)" />
         <button class="btn btn-primary" id="db">DART 검색</button>
       </div>
