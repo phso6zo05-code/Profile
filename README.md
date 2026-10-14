@@ -7,10 +7,10 @@ Open DART에서 기업 개황과 직원 현황을 가져오고, Gemini로 기업
 - `index.html` : 화면 전체 (스킬 매칭, 직무 적합도, 공고 관리)
 - `server.py` : 페이지 제공 + DART/Gemini 프록시 (Python 표준 라이브러리만 사용)
 - `render.yaml` : Render 배포 설정
-- `portfolio.json` : (선택) 방문자에게 보여줄 내용. 페이지 하단 "JSON 백업"으로 받은 파일
+- `portfolio.json` : (선택) 방문자에게 보여줄 내용. 페이지 하단 "JSON 백업"으로 받은 파일. 저장한 공고와 DART 직원 현황은 브라우저에만 저장되므로, 다른 컴퓨터에서도 보이려면 이 파일을 server.py 옆에 두어야 합니다
 
 ## 내 컴퓨터에서 실행
-1. 같은 폴더에 `.env` 파일을 만들고 키를 넣습니다.
+1. `.env.example`을 복사해 `.env`로 이름을 바꾸고 키를 넣습니다. (`.env`는 저장소에 올라가지 않으므로 다른 컴퓨터에서는 매번 새로 만들어야 합니다)
    ```
    DART_API_KEY=발급받은_키
    GEMINI_API_KEY=발급받은_키
